@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ParentBook · Candidate Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --teal-dk:   #0A3D35;
+  --teal:      #1A7A6A;
+  --teal-mid:  #2E9B87;
+  --teal-lt:   #E6F4F1;
+  --gold:      #C8952A;
+  --gold-lt:   #F5E6C8;
+  --gold-dk:   #8A6010;
+  --champagne: #F7EDD8;
+  --cream:     #FDFAF5;
+  --ink:       #1C2B2A;
+  --ink-mid:   #4A5A58;
+  --ink-lt:    #8A9A98;
+  --white:     #FFFFFF;
+  --border:    rgba(200,149,42,0.2);
+  --border-lt: rgba(200,149,42,0.1);
+  --green:     #2E6B2E;
+  --green-lt:  #EAF4E1;
+  --red:       #C0392B;
+  --red-lt:    #FADBD8;
+  --blue:      #1565A0;
+  --blue-lt:   #E3F0FA;
+  --shadow:    0 24px 64px rgba(10,61,53,0.18);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--teal-dk);
+  color: var(--ink);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── BACKGROUND TEXTURE ── */
+body::before {
+  content: '';
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 20%, rgba(46,155,135,0.15) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 80% 80%, rgba(200,149,42,0.08) 0%, transparent 60%);
+  pointer-events: none; z-index: 0;
+}
+
+/* ── SCREENS ── */
+.screen {
+  display: none;
+  min-height: 100vh;
+  position: relative; z-index: 1;
+}
+.screen.active { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; }
+
+/* ── LOGIN SCREEN ── */
+#screen-login {
+  text-align: center;
+}
+.portal-wordmark {
+  font-family: 'Playfair Display', serif;
+  font-size: 13px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 36px;
+  opacity: 0.8;
+}
+.login-logo {
+  width: 80px; height: 80px; border-radius: 22px;
+  background: rgba(200,149,42,0.12);
+  border: 1.5px solid rgba(200,149,42,0.3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px; margin: 0 auto 20px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 32px rgba(200,149,42,0.15);
+}
+.login-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 30px; font-weight: 500;
+  color: var(--white);
+  margin-bottom: 8px;
+  line-height: 1.2;
+}
+.login-sub {
+  font-size: 14px; color: rgba(255,255,255,0.45);
+  margin-bottom: 40px; line-height: 1.6;
+}
+.login-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(200,149,42,0.2);
+  border-radius: 20px;
+  padding: 32px 28px;
+  width: 100%; max-width: 380px;
+  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow);
+}
+.login-card-label {
+  font-size: 11px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 2px;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 20px;
+}
+
+/* PIN DOTS */
+.pin-dots {
+  display: flex; gap: 14px; justify-content: center; margin-bottom: 28px;
+}
+.pin-dot {
+  width: 14px; height: 14px; border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  border: 1.5px solid rgba(255,255,255,0.25);
+  transition: all 0.2s;
+}
+.pin-dot.filled {
+  background: var(--gold);
+  border-color: var(--gold);
+  box-shadow: 0 0 12px rgba(200,149,42,0.5);
+}
+
+/* KEYPAD */
+.pin-keypad {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 10px;
+  max-width: 280px; margin: 0 auto;
+}
+.pin-key {
+  padding: 15px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--white);
+  font-size: 20px; font-weight: 600;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: all 0.15s;
+  letter-spacing: 0;
+}
+.pin-key:hover { background: rgba(200,149,42,0.2); border-color: rgba(200,149,42,0.4); transform: scale(1.05); }
+.pin-key:active { transform: scale(0.95); }
+.pin-key.del { font-size: 16px; }
+.pin-key.empty { background: none; border: none; cursor: default; }
+.pin-key.empty:hover { transform: none; }
+.pin-error {
+  margin-top: 18px; font-size: 13px;
+  color: rgba(255,100,80,0.85); font-weight: 500;
+  min-height: 20px; text-align: center;
+}
+
+/* ── PORTAL MAIN ── */
+#screen-portal {
+  background: var(--cream);
+  display: none;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 0;
+}
+#screen-portal.active {
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-start;
+}
+
+/* PORTAL HEADER */
+.portal-header {
+  background: var(--teal-dk);
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(200,149,42,0.2);
+  position: sticky; top: 0; z-index: 100;
+}
+.ph-brand {
+  font-family: 'Playfair Display', serif;
+  font-size: 15px; color: var(--white);
+  display: flex; align-items: center; gap: 10px;
+}
+.ph-brand span { font-size: 11px; color: rgba(255,255,255,0.4); font-family: 'DM Sans',sans-serif; font-weight: 400; letter-spacing: 1px; text-transform: uppercase; }
+.ph-candidate {
+  font-size: 12px; color: rgba(255,255,255,0.5);
+  display: flex; align-items: center; gap: 8px;
+}
+.ph-candidate strong { color: var(--gold); font-weight: 600; }
+
+/* PORTAL BODY */
+.portal-body {
+  flex: 1;
+  max-width: 680px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 32px 20px 60px;
+}
+
+/* WELCOME BANNER */
+.welcome-banner {
+  background: var(--teal-dk);
+  border-radius: 16px;
+  padding: 28px 28px 24px;
+  margin-bottom: 28px;
+  position: relative;
+  overflow: hidden;
+}
+.welcome-banner::after {
+  content: '🏡';
+  position: absolute; right: 24px; bottom: -4px;
+  font-size: 60px; opacity: 0.08;
+}
+.wb-eyebrow {
+  font-size: 11px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 2px;
+  color: var(--gold); margin-bottom: 8px;
+}
+.wb-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px; color: var(--white);
+  margin-bottom: 8px;
+}
+.wb-body {
+  font-size: 13px; color: rgba(255,255,255,0.55);
+  line-height: 1.7; max-width: 400px;
+}
+
+/* PROGRESS TRACKER */
+.progress-card {
+  background: var(--white);
+  border-radius: 16px;
+  border: 1.5px solid #E8E0D0;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 12px rgba(10,61,53,0.06);
+}
+.progress-title {
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1.5px;
+  color: var(--ink-lt); margin-bottom: 20px;
+}
+.progress-steps {
+  display: flex; flex-direction: column; gap: 0;
+}
+.progress-step {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 12px 0;
+  position: relative;
+}
+.progress-step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 15px; top: 40px;
+  width: 2px; height: calc(100% - 16px);
+  background: var(--border-lt);
+}
+.ps-circle {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; flex-shrink: 0;
+  border: 2px solid transparent;
+  transition: all 0.3s;
+  position: relative; z-index: 1;
+}
+.ps-circle.done    { background: var(--green); color: white; border-color: var(--green); }
+.ps-circle.active  { background: var(--gold); color: white; border-color: var(--gold); box-shadow: 0 0 0 4px rgba(200,149,42,0.15); }
+.ps-circle.locked  { background: #F0EDE8; color: var(--ink-lt); border-color: #E0DDD8; }
+.ps-circle.pending { background: var(--blue-lt); color: var(--blue); border-color: #90CAF9; }
+.ps-info { flex: 1; padding-top: 4px; }
+.ps-label {
+  font-size: 13px; font-weight: 600; color: var(--ink);
+  margin-bottom: 2px;
+}
+.ps-label.locked { color: var(--ink-lt); }
+.ps-status {
+  font-size: 11px; font-weight: 600;
+  padding: 2px 8px; border-radius: 8px;
+  display: inline-block;
+}
+.ps-status.done    { background: var(--green-lt); color: var(--green); }
+.ps-status.active  { background: var(--gold-lt); color: var(--gold-dk); }
+.ps-status.locked  { background: #F0EDE8; color: var(--ink-lt); }
+.ps-status.pending { background: var(--blue-lt); color: var(--blue); }
+.ps-status.approved { background: var(--green-lt); color: var(--green); }
+.ps-status.review   { background: var(--blue-lt); color: var(--blue); }
+.ps-status.not-selected { background: var(--red-lt); color: var(--red); }
+
+/* ACTION CARDS */
+.action-card {
+  background: var(--white);
+  border-radius: 16px;
+  border: 1.5px solid #E8E0D0;
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 12px rgba(10,61,53,0.06);
+  display: none;
+}
+.action-card.visible { display: block; }
+.ac-eyebrow {
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 2px;
+  color: var(--gold); margin-bottom: 6px;
+}
+.ac-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px; color: var(--teal-dk);
+  margin-bottom: 6px;
+}
+.ac-body {
+  font-size: 13px; color: var(--ink-mid);
+  line-height: 1.7; margin-bottom: 18px;
+}
+
+/* FORM STYLES */
+.field { margin-bottom: 14px; }
+.field label {
+  display: block;
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.8px;
+  color: var(--ink-mid); margin-bottom: 5px;
+}
+.field input, .field select, .field textarea {
+  width: 100%; padding: 10px 14px;
+  border: 1.5px solid #E0DDD8;
+  border-radius: 10px;
+  font-size: 14px; font-family: 'DM Sans', sans-serif;
+  color: var(--ink);
+  background: var(--cream);
+  transition: border-color 0.2s;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  outline: none; border-color: var(--teal);
+}
+.field textarea { min-height: 80px; resize: vertical; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* INTERVIEW SLOTS */
+.slot-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  margin: 16px 0;
+}
+.time-slot {
+  padding: 14px 12px;
+  border-radius: 12px;
+  border: 1.5px solid #E0DDD8;
+  background: var(--cream);
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s;
+}
+.time-slot:hover { border-color: var(--teal); background: var(--teal-lt); }
+.time-slot.selected { border-color: var(--teal); background: var(--teal-lt); }
+.time-slot.selected .ts-time { color: var(--teal-dk); }
+.time-slot.booked { border-color: #A5D6A7; background: var(--green-lt); cursor: default; }
+.ts-day { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--ink-lt); margin-bottom: 3px; }
+.ts-time { font-size: 14px; font-weight: 700; color: var(--ink); }
+.ts-note { font-size: 10px; color: var(--ink-lt); margin-top: 2px; }
+
+/* BUTTONS */
+.btn-portal {
+  padding: 13px 24px;
+  border-radius: 10px; border: none;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px; font-weight: 600;
+  transition: all 0.2s;
+  display: inline-flex; align-items: center; gap: 7px;
+}
+.btn-portal.primary { background: var(--teal-dk); color: white; }
+.btn-portal.primary:hover { background: var(--teal); }
+.btn-portal.gold { background: var(--gold); color: white; }
+.btn-portal.gold:hover { opacity: 0.9; }
+.btn-portal.full { width: 100%; justify-content: center; }
+.btn-portal:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ACKNOWLEDGMENT CHECKLIST */
+.ack-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 0; border-bottom: 1px solid #F0EDE8;
+  font-size: 13px; color: var(--ink-mid); line-height: 1.6;
+}
+.ack-item:last-child { border-bottom: none; }
+.ack-item input[type=checkbox] { margin-top: 2px; flex-shrink: 0; accent-color: var(--teal); width: 15px; height: 15px; }
+
+/* HIRED SCREEN */
+.hired-banner {
+  background: linear-gradient(135deg, var(--teal-dk) 0%, var(--teal) 100%);
+  border-radius: 20px;
+  padding: 40px 28px;
+  text-align: center;
+  color: white;
+  margin-bottom: 20px;
+  position: relative; overflow: hidden;
+}
+.hired-banner::before {
+  content: '🎉';
+  position: absolute; font-size: 120px; opacity: 0.06;
+  top: -20px; right: -20px;
+}
+.hired-icon { font-size: 48px; margin-bottom: 16px; }
+.hired-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px; margin-bottom: 10px;
+}
+.hired-sub { font-size: 14px; opacity: 0.65; line-height: 1.7; }
+
+/* CONTACT CARD */
+.contact-card {
+  background: var(--white);
+  border-radius: 14px;
+  border: 1.5px solid #E8E0D0;
+  padding: 20px;
+  display: flex; align-items: center; gap: 14px;
+}
+.cc-avatar {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: var(--teal-lt);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 18px; font-weight: 700; color: var(--teal-dk);
+  flex-shrink: 0;
+}
+.cc-name { font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 2px; }
+.cc-role { font-size: 12px; color: var(--ink-lt); }
+.cc-contact { font-size: 12px; color: var(--teal); margin-top: 4px; font-weight: 600; }
+
+/* ALERT */
+.portal-alert {
+  padding: 12px 16px; border-radius: 10px;
+  font-size: 13px; margin-top: 12px;
+  display: none;
+}
+.portal-alert.show { display: block; }
+.portal-alert.success { background: var(--green-lt); color: var(--green); border: 1px solid #A5D6A7; }
+.portal-alert.error   { background: var(--red-lt); color: var(--red); border: 1px solid #F1948A; }
+
+/* SECTION DIVIDER */
+.section-divider {
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 2px;
+  color: var(--ink-lt); padding: 20px 0 10px;
+  border-top: 1px solid #F0EDE8; margin-top: 8px;
+}
+
+/* LOCKOUT CARD */
+.locked-card {
+  background: #F8F5F0;
+  border-radius: 14px;
+  border: 1.5px dashed #E0DDD8;
+  padding: 20px;
+  text-align: center;
+  margin-bottom: 20px;
+  display: none;
+}
+.locked-card.visible { display: block; }
+.lc-icon { font-size: 28px; margin-bottom: 8px; }
+.lc-text { font-size: 13px; color: var(--ink-lt); line-height: 1.6; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.portal-body > * { animation: fadeUp 0.4s ease both; }
+.portal-body > *:nth-child(1) { animation-delay: 0.05s; }
+.portal-body > *:nth-child(2) { animation-delay: 0.1s; }
+.portal-body > *:nth-child(3) { animation-delay: 0.15s; }
+.portal-body > *:nth-child(4) { animation-delay: 0.2s; }
+
+@media (max-width: 480px) {
+  .form-grid { grid-template-columns: 1fr; }
+  .slot-grid  { grid-template-columns: 1fr; }
+  .login-card { padding: 24px 20px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- SCREEN 1 — PIN LOGIN                                   -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="screen active" id="screen-login">
+  <div class="portal-wordmark">ParentBook · Candidate Portal</div>
+
+  <div class="login-logo">🏡</div>
+  <div class="login-title">Welcome.</div>
+  <div class="login-sub">Enter the access code Ty sent you<br>to continue with your application.</div>
+
+  <div class="login-card">
+    <div class="login-card-label">Your Access Code</div>
+    <div class="pin-dots">
+      <div class="pin-dot" id="dot-0"></div>
+      <div class="pin-dot" id="dot-1"></div>
+      <div class="pin-dot" id="dot-2"></div>
+      <div class="pin-dot" id="dot-3"></div>
+    </div>
+    <div class="pin-keypad">
+      <button class="pin-key" onclick="pinKey('1')">1</button>
+      <button class="pin-key" onclick="pinKey('2')">2</button>
+      <button class="pin-key" onclick="pinKey('3')">3</button>
+      <button class="pin-key" onclick="pinKey('4')">4</button>
+      <button class="pin-key" onclick="pinKey('5')">5</button>
+      <button class="pin-key" onclick="pinKey('6')">6</button>
+      <button class="pin-key" onclick="pinKey('7')">7</button>
+      <button class="pin-key" onclick="pinKey('8')">8</button>
+      <button class="pin-key" onclick="pinKey('9')">9</button>
+      <div class="pin-key empty"></div>
+      <button class="pin-key" onclick="pinKey('0')">0</button>
+      <button class="pin-key del" onclick="pinDel()">⌫</button>
+    </div>
+    <div class="pin-error" id="pin-error"></div>
+  </div>
+
+  <div style="margin-top:24px;font-size:12px;color:rgba(255,255,255,0.25);text-align:center;">
+    Need help? Contact Ty directly for your access code.
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- SCREEN 2 — CANDIDATE PORTAL                            -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="screen" id="screen-portal">
+
+  <div class="portal-header">
+    <div class="ph-brand">
+      🏡 ParentBook <span>Candidate Portal</span>
+    </div>
+    <div class="ph-candidate">
+      <span id="header-candidate-name"></span><span id="header-role" style="font-size:10px;color:rgba(255,255,255,0.35);margin-left:6px;"></span>
+      <button onclick="logout()" style="padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:none;color:rgba(255,255,255,0.4);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;">Sign out</button>
+    </div>
+  </div>
+
+  <div class="portal-body">
+
+    <!-- WELCOME BANNER -->
+    <div class="welcome-banner">
+      <div class="wb-eyebrow">ParentBook · Hiring</div>
+      <div class="wb-title" id="welcome-name">Welcome, Candidate</div>
+      <div class="wb-body">This is your private portal for the ParentBook hiring process. Each step will unlock as you move through the stages. We're glad you're here.</div>
+    </div>
+
+    <!-- PROGRESS TRACKER -->
+    <div class="progress-card">
+      <div class="progress-title">Your Progress</div>
+      <div class="progress-steps" id="progress-steps"></div>
+    </div>
+
+    <!-- INTERVIEW: Google Calendar self-booking -->
+    <div class="action-card" id="card-interview">
+      <div class="ac-eyebrow">Stage 2 &mdash; Action Required</div>
+      <div class="ac-title">Book Your Interview</div>
+      <div class="ac-body">Click below to pick a time that works for you &mdash; it's a quick 15-20 minute chat with Ty. After booking you'll get a calendar confirmation automatically.</div>
+      <div style="background:var(--gold-lt);border-radius:12px;padding:14px 16px;margin-bottom:18px;border:1px solid rgba(200,149,42,0.2);">
+        <div style="font-size:12px;color:var(--gold-dk);line-height:1.6;">&#128221; Please <strong>accept the calendar invite</strong> after booking to confirm your spot.</div>
+      </div>
+      <a href="https://calendar.app.google/AYQ4mwdzwqne82Sd6" target="_blank" class="btn-portal gold full" id="btn-book-interview"
+         onclick="setTimeout(markInterviewBooked,3000)"
+         style="text-decoration:none;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px;">
+        &#128197; Open Booking Calendar
+      </a>
+      <div style="text-align:center;font-size:12px;color:var(--ink-lt);">
+        Already booked? <button onclick="markInterviewBooked()" style="background:none;border:none;color:var(--teal);font-size:12px;cursor:pointer;font-family:inherit;font-weight:600;padding:0;">Tap here to confirm</button>
+      </div>
+      <div class="portal-alert" id="interview-alert"></div>
+    </div>
+
+    <!-- LOCKED: INTERVIEW PENDING -->
+    <div class="locked-card" id="card-interview-pending">
+      <div class="lc-icon">⏳</div>
+      <div class="lc-text"><strong>Interview Under Review</strong><br>Ty will update your status after your interview. Check back soon.</div>
+    </div>
+
+    <!-- ACTION: PRE-ONBOARDING FORM -->
+    <div class="action-card" id="card-preonboarding">
+      <div class="ac-eyebrow">Stage 3 — Unlocked</div>
+      <div class="ac-title">Pre-Onboarding Form</div>
+      <div class="ac-body">Congratulations on passing your interview! Please complete this form before your onboarding training. All information is kept confidential.</div>
+
+      <!-- BASIC INFO -->
+      <div class="section-divider">Personal Information</div>
+      <div class="form-grid">
+        <div class="field"><label>Full Legal Name</label><input type="text" id="po-legal" placeholder="As it appears on ID"></div>
+        <div class="field"><label>Preferred Name</label><input type="text" id="po-pref" placeholder="What you go by"></div>
+      </div>
+      <div class="form-grid">
+        <div class="field"><label>Email Address</label><input type="email" id="po-email"></div>
+        <div class="field"><label>Phone Number</label><input type="tel" id="po-phone" placeholder="(555) 000-0000"></div>
+      </div>
+      <div class="field"><label>City of Residence</label><input type="text" id="po-city"></div>
+
+      <!-- AVAILABILITY -->
+      <div class="section-divider">Availability</div>
+      <div class="field">
+        <label>Which days are you available?</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;">
+          <label style="display:flex;align-items:center;gap:5px;font-size:13px;font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink-mid);"><input type="checkbox" id="avail-mon" style="accent-color:var(--teal);"> Mon</label>
+          <label style="display:flex;align-items:center;gap:5px;font-size:13px;font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink-mid);"><input type="checkbox" id="avail-tue" style="accent-color:var(--teal);"> Tue</label>
+          <label style="display:flex;align-items:center;gap:5px;font-size:13px;font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink-mid);"><input type="checkbox" id="avail-wed" style="accent-color:var(--teal);"> Wed</label>
+          <label style="display:flex;align-items:center;gap:5px;font-size:13px;font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink-mid);"><input type="checkbox" id="avail-thu" style="accent-color:var(--teal);"> Thu</label>
+          <label style="display:flex;align-items:center;gap:5px;font-size:13px;font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink-mid);"><input type="checkbox" id="avail-fri" style="accent-color:var(--teal);"> Fri</label>
+        </div>
+      </div>
+      <div class="field">
+        <label>Reliable transportation between client homes?</label>
+        <select id="po-transport"><option>Yes — I have reliable transportation</option><option>No</option></select>
+      </div>
+
+      <!-- ACKNOWLEDGMENTS -->
+      <div class="section-divider">Acknowledgments</div>
+      <div style="font-size:13px;color:var(--ink-mid);margin-bottom:12px;line-height:1.6;">As a Reset Execution Specialist, I understand and agree to the following:</div>
+      <div class="ack-item"><input type="checkbox" id="ack1"> I do not communicate directly with clients — all communication goes through Ty</div>
+      <div class="ack-item"><input type="checkbox" id="ack2"> I follow the specific instructions provided for each household</div>
+      <div class="ack-item"><input type="checkbox" id="ack3"> I will arrive on time and ready for every scheduled shift</div>
+      <div class="ack-item"><input type="checkbox" id="ack4"> I understand consistency and reliability are essential to this role</div>
+      <div class="ack-item"><input type="checkbox" id="ack5"> I am comfortable performing hands-on household tasks: laundry, dishes, light resets</div>
+      <div class="ack-item"><input type="checkbox" id="ack6"> I am comfortable wearing gloves and a provided apron while working</div>
+
+      <!-- IC AGREEMENT -->
+      <div class="section-divider">Independent Contractor Agreement</div>
+      <div style="background:#F8F5F0;border-radius:10px;padding:14px 16px;font-size:13px;color:var(--ink-mid);line-height:1.7;margin-bottom:14px;border:1px solid #E8E0D0;">
+        I understand that I am engaged as an independent contractor, not an employee of ParentBook. I am responsible for my own taxes, and I agree to provide services in accordance with ParentBook standards. I understand that scheduling and continuation of work are based on reliability, performance, and adherence to expectations.
+      </div>
+      <div class="ack-item"><input type="checkbox" id="ack-ic"> I have read and agree to the Independent Contractor acknowledgment above</div>
+
+      <!-- SIGNATURE -->
+      <div class="section-divider">Signature</div>
+      <div class="form-grid">
+        <div class="field"><label>Electronic Signature (type full legal name)</label><input type="text" id="po-sig" placeholder="Full legal name as your signature"></div>
+        <div class="field"><label>Today's Date</label><input type="date" id="po-sig-date"></div>
+      </div>
+
+      <button class="btn-portal primary full" style="margin-top:8px;" onclick="submitPreOnboarding()">
+        📋 Submit Pre-Onboarding Form
+      </button>
+      <div class="portal-alert" id="preonboard-alert"></div>
+    </div>
+
+    <!-- TRAINING: coordinator-scheduled, Ty sends invite -->
+    <div class="action-card" id="card-training">
+      <div class="ac-eyebrow">Stage 4 &mdash; Almost There!</div>
+      <div class="ac-title">Your Onboarding Session</div>
+      <div class="ac-body">Ty has scheduled your paid onboarding session. Check your email for the calendar invite and accept it to confirm your spot.</div>
+
+      <div style="background:#F8F5F0;border-radius:14px;padding:20px;margin-bottom:16px;border:1px solid #E8E0D0;">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-lt);margin-bottom:12px;">&#128203; What to Expect</div>
+        <div style="font-size:13px;color:var(--ink-mid);line-height:1.75;">
+          This is a short, paid remote session where we&#39;ll cover:
+          <ul style="margin:8px 0 8px 16px;padding:0;">
+            <li>What to expect in your role</li>
+            <li>How communication works at ParentBook</li>
+            <li>How to select shifts and log your hours</li>
+            <li>Next steps before your first in-home shift</li>
+          </ul>
+          Sessions may sometimes be held in a small group so everyone gets the same info at the same time &mdash; you&#39;ll still have time to ask questions.
+        </div>
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid #E8E0D0;font-size:13px;color:var(--ink-mid);line-height:1.6;">
+          &#128187; <strong>Please join from a computer</strong> on time, from a quiet space, and be ready to participate.<br>
+          <span style="color:var(--ink-lt);font-size:12px;">If something comes up, reply to your email or text thread as soon as possible.</span>
+        </div>
+      </div>
+      <div style="background:var(--teal-lt);border-radius:12px;padding:18px 20px;margin-bottom:16px;border:1px solid rgba(26,122,106,0.2);">
+        <div style="font-size:11px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">&#128197; Your Session Details</div>
+        <div id="training-details" style="font-size:14px;color:var(--ink);font-weight:600;line-height:1.8;">Loading...</div>
+      </div>
+      <div style="background:var(--gold-lt);border-radius:10px;padding:12px 16px;font-size:13px;color:var(--gold-dk);border:1px solid rgba(200,149,42,0.2);">
+        &#128155; This session is <strong>paid</strong> &mdash; a $25 training stipend is included in your first Friday payment.
+      </div>
+      <div class="portal-alert" id="training-alert"></div>
+    </div>
+
+    <!-- SCREEN WAITING -->
+    <div class="locked-card" id="card-screen-waiting" style="display:none;background:var(--teal-lt);border-color:rgba(26,122,106,0.2);">
+      <div class="lc-icon">&#128222;</div>
+      <div class="lc-text" style="color:var(--teal-dk);"><strong>Phone Screen Complete!</strong><br>Great work! Ty will review and unlock your next step within 1&ndash;2 business days.</div>
+    </div>
+    <!-- PREBOARD SUBMITTED -->
+    <div class="locked-card" id="card-preboard-submitted" style="display:none;background:var(--teal-lt);border-color:rgba(26,122,106,0.2);">
+      <div class="lc-icon">&#9203;</div>
+      <div class="lc-text" style="color:var(--teal-dk);"><strong>Form received &mdash; reviewing now!</strong><br>Ty will be in touch within 48 hours with your onboarding session details and a calendar invite. Keep an eye on your email!</div>
+    </div>
+
+    <!-- LOCKED CARDS (for stages not yet reached) -->
+    <div class="locked-card" id="card-locked-preboard">
+      <div class="lc-icon">🔒</div>
+      <div class="lc-text"><strong>Pre-Onboarding Form</strong><br>This will unlock once your interview has been approved by Ty.</div>
+    </div>
+
+    <div class="locked-card" id="card-locked-training">
+      <div class="lc-icon">🔒</div>
+      <div class="lc-text"><strong>Onboarding Session</strong><br>Once Ty reviews your pre-onboarding form, you'll receive an email with your session details and a calendar invite.</div>
+    </div>
+
+    <!-- HIRED CELEBRATION -->
+    <div class="action-card" id="card-hired">
+      <div class="hired-banner">
+        <div class="hired-icon">🎉</div>
+        <div class="hired-title">You're on the team.</div>
+        <div class="hired-sub">Welcome to ParentBook. We're excited to have you. Your first shift details will come from Ty directly.</div>
+      </div>
+
+      <div style="padding:16px 0 8px;">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--ink-lt);margin-bottom:12px;">What Happens Next</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--ink-mid);line-height:1.6;">
+            <span style="font-size:16px;flex-shrink:0;">📱</span> Ty will text you your Specialist Hub access code — this is where you'll log shifts, request supplies, and see your schedule.
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--ink-mid);line-height:1.6;">
+            <span style="font-size:16px;flex-shrink:0;">📋</span> Review the policies in your Specialist Hub before your first shift. Know them.
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--ink-mid);line-height:1.6;">
+            <span style="font-size:16px;flex-shrink:0;">🏡</span> Show up with care. Details matter. Communicate always. That's the ParentBook standard.
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:16px;border-top:1px solid #F0EDE8;padding-top:16px;">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--ink-lt);margin-bottom:12px;">Your Lead</div>
+        <div class="contact-card">
+          <div class="cc-avatar">T</div>
+          <div>
+            <div class="cc-name">Ty Jimenez</div>
+            <div class="cc-role">Director · ParentBook</div>
+            <div class="cc-contact">Your primary contact for everything</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end portal-body -->
+</div><!-- end screen-portal -->
+
+
+<script>
+
+var APPS_URL = 'https://script.google.com/macros/s/AKfycbyJbw0V4xhqps2KqpvIMW31mTbMEsG4oLpHaupyjlaheR2fj-yIX4fH0Rwlcq62Vp5c/exec';
+
+var STAGE_MAP = {
+  'Applied':'screen','Phone Screen Scheduled':'screen','Phone Screen Completed':'screen',
+  'Interview Scheduled':'interview_book','Interview Pending':'interview_pending',
+  'Interview Approved':'interview_approved','Reference Check':'interview_approved',
+  'Background Check':'preboard','Pre-Onboarding':'preboard',
+  'Pre-Onboarding Submitted':'preboard_done',
+  'Training Scheduled':'training_book','Training Completed':'training_done',
+  'Hired':'hired'
+};
+
+var STAGES = [
+  {id:'screen',    label:'Phone Screen',       icon:'&#128222;'},
+  {id:'interview', label:'Interview',           icon:'&#128100;'},
+  {id:'reference', label:'Reference Check',     icon:'&#128269;'},
+  {id:'background',label:'Background Check',   icon:'&#10003;'},
+  {id:'preboard',  label:'Pre-Onboarding Form', icon:'&#128203;'},
+  {id:'training',  label:'Onboarding Training', icon:'&#127891;'},
+  {id:'hired',     label:'Final Approval',      icon:'&#127881;'}
+];
+
+function getStepStatus(st, id) {
+  if(id==='screen') return st==='screen' ? 'active' : 'done';
+  if(id==='interview') {
+    if(st==='screen') return 'locked';
+    if(st==='interview_book') return 'active';
+    if(st==='interview_pending') return 'pending';
+    return 'done';
+  }
+  if(id==='reference') {
+    if(['screen','interview_book','interview_pending'].includes(st)) return 'locked';
+    if(st==='interview_approved') return 'active';
+    return 'done';
+  }
+  if(id==='background') {
+    if(['screen','interview_book','interview_pending','interview_approved'].includes(st)) return 'locked';
+    if(st==='preboard') return 'active';
+    return 'done';
+  }
+  if(id==='preboard') {
+    if(['screen','interview_book','interview_pending','interview_approved'].includes(st)) return 'locked';
+    if(st==='preboard') return 'active';
+    if(['preboard_done','training_book','training_done','hired'].includes(st)) return 'done';
+    return 'locked';
+  }
+  if(id==='training') {
+    if(['preboard_done','training_book'].includes(st)) return 'active';
+    if(['training_done','hired'].includes(st)) return 'done';
+    return 'locked';
+  }
+  if(id==='hired') return st==='hired' ? 'done' : 'locked';
+  return 'locked';
+}
+
+var STEP_LABELS = {
+  done:   {text:'Completed &#10003;', cls:'done'},
+  active: {text:'In Progress',        cls:'active'},
+  pending:{text:'Under Review',       cls:'review'},
+  locked: {text:'Locked',             cls:'locked'}
+};
+
+var ROLE_ACKS = {
+  'Reset Execution Specialist': [
+    'I do not communicate directly with clients &mdash; all communication goes through Ty',
+    'I follow the specific reset instructions provided for each household',
+    'I will arrive on time and ready for every scheduled shift',
+    'I understand that consistency and reliability are essential to this role',
+    'I am comfortable with hands-on tasks: folding, sorting, organizing, and light cleaning',
+    'I am comfortable wearing gloves and a provided apron while working'
+  ],
+  'Laundry Specialist': [
+    'I do not communicate directly with clients &mdash; all communication goes through Ty',
+    'I follow specific care instructions for each household&#39;s laundry',
+    'I will arrive on time and ready for every scheduled shift',
+    'I understand that attention to detail and reliability are essential to this role',
+    'I am comfortable handling laundry start to finish: washing, drying, folding, and returning',
+    'I am comfortable wearing gloves and a provided apron while working'
+  ],
+  'Family Assistant Specialist': [
+    'I do not communicate with clients beyond what is required for the immediate task',
+    'I follow the specific instructions the coordinator provides for each household',
+    'I will arrive on time and ready for every scheduled shift',
+    'I understand that reliability and flexibility are the core expectations of this role',
+    'I am comfortable working in family environments, including when children are present',
+    'I understand all client communication goes through Ty'
+  ],
+  'Op Support / Floater': [
+    'I do not communicate directly with clients &mdash; all communication goes through Ty',
+    'I am comfortable stepping into different roles and households on short notice',
+    'I will arrive on time and ready for every assigned shift',
+    'I understand that flexibility and reliability are the core expectations of this role',
+    'I am comfortable performing a range of household support tasks as directed',
+    'I am comfortable wearing gloves and a provided apron while working'
+  ],
+  'Household Manager': [
+    'I do not communicate with clients beyond what Ty has authorized',
+    'I understand this role is earned through demonstrated reliability within ParentBook',
+    'I will maintain clear communication with Ty about all household coordination',
+    'I understand that discretion and professionalism are essential at all times',
+    'I am comfortable overseeing schedules, vendors, and team activities on behalf of clients'
+  ],
+  'ParentBook Approved Partner': [
+    'I understand that referrals through ParentBook are based on performance and professionalism',
+    'I will represent my services in a manner consistent with ParentBook standards',
+    'I do not solicit ParentBook clients directly &mdash; all referral arrangements go through Ty',
+    'I understand my standing as a ParentBook partner may be reviewed at any time'
+  ]
+};
+
+var DEFAULT_ACKS = [
+  'I do not communicate directly with clients &mdash; all communication goes through Ty',
+  'I follow the specific instructions provided for each household',
+  'I will arrive on time and ready for every scheduled shift',
+  'I understand that consistency and reliability are essential to this role'
+];
+
+function buildAcknowledgments() {
+  var role = currentCandidate.Role || currentCandidate.role || '';
+  var acks = ROLE_ACKS[role] || DEFAULT_ACKS;
+  var introEl = document.getElementById('ack-role-intro');
+  if(introEl) introEl.textContent = 'As a ' + (role || 'ParentBook team member') + ', I understand and agree to the following:';
+  var listEl = document.getElementById('ack-list');
+  if(listEl) listEl.innerHTML = acks.map(function(ack,i){
+    return '<div class="ack-item"><input type="checkbox" id="ack'+(i+1)+'"> '+ack+'</div>';
+  }).join('');
+  window._ackCount = acks.length;
+}
+
+var pinEntry = '';
+var currentCandidate = null;
+
+function post(payload) {
+  return fetch(APPS_URL, {method:'POST', body:JSON.stringify(payload)})
+    .then(function(r){return r.json();})
+    .catch(function(){return {success:false};});
+}
+
+function pinKey(d) {
+  if(pinEntry.length >= 4) return;
+  pinEntry += d; updateDots();
+  if(pinEntry.length === 4) setTimeout(checkPin, 180);
+}
+function pinDel() {
+  pinEntry = pinEntry.slice(0,-1); updateDots();
+  document.getElementById('pin-error').textContent = '';
+}
+function updateDots() {
+  for(var i=0;i<4;i++) document.getElementById('dot-'+i).classList.toggle('filled', i < pinEntry.length);
+}
+function checkPin() {
+  var errEl = document.getElementById('pin-error');
+  errEl.textContent = 'Checking...';
+  fetch(APPS_URL, {method:'POST', body:JSON.stringify({action:'lookupPin', pin:pinEntry})})
+    .then(function(r) {
+      if(!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then(function(data) {
+      if(data.success && data.candidate) {
+        currentCandidate = data.candidate;
+        enterPortal();
+      } else {
+        pinEntry=''; updateDots();
+        errEl.textContent = 'Incorrect code — try again. (' + (data.error||'no match') + ')';
+      }
+    }).catch(function(err) {
+      pinEntry=''; updateDots();
+      errEl.textContent = 'Error: ' + err.message + ' — check console';
+      console.error('Portal error:', err);
+    });
+}
+
+function enterPortal() {
+  document.getElementById('screen-login').classList.remove('active');
+  var portal = document.getElementById('screen-portal');
+  portal.classList.add('active'); portal.style.display='flex';
+  var c = currentCandidate;
+  var name = c.Name || c.name || 'Candidate';
+  document.getElementById('welcome-name').textContent = 'Welcome, ' + name + '.';
+  document.getElementById('header-candidate-name').innerHTML = '<strong>'+name+'</strong>';
+  var roleEl = document.getElementById('header-role');
+  if(roleEl) roleEl.textContent = c.Role || c.role || '';
+  var rawStage = c.Stage || c.stage || 'Applied';
+  // handle "Hired 🎉" with emoji
+  if(rawStage.startsWith('Hired')) rawStage = 'Hired';
+  var stage = STAGE_MAP[rawStage] || 'screen';
+  renderProgress(stage);
+  renderActionCards(stage);
+}
+
+function renderProgress(stage) {
+  document.getElementById('progress-steps').innerHTML = STAGES.map(function(step) {
+    var status = getStepStatus(stage, step.id);
+    var lbl = STEP_LABELS[status] || STEP_LABELS.locked;
+    var icon = status==='done' ? '&#10003;' : (status==='active'||status==='pending') ? step.icon : '&#9675;';
+    return '<div class="progress-step">'+
+      '<div class="ps-circle '+status+'">'+icon+'</div>'+
+      '<div class="ps-info">'+
+        '<div class="ps-label '+(status==='locked'?'locked':'')+'">'+step.label+'</div>'+
+        '<span class="ps-status '+lbl.cls+'">'+lbl.text+'</span>'+
+      '</div></div>';
+  }).join('');
+}
+
+function renderActionCards(stage) {
+  ['card-interview','card-interview-pending','card-preonboarding','card-training',
+   'card-locked-preboard','card-locked-training','card-hired',
+   'card-screen-waiting','card-preboard-submitted'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el){el.classList.remove('visible');el.style.display='none';}
+  });
+  function show(id) {
+    var el=document.getElementById(id);
+    if(el){el.classList.add('visible');el.style.display='block';}
+  }
+  if(stage==='screen') {
+    show('card-screen-waiting'); show('card-locked-preboard'); show('card-locked-training');
+  } else if(stage==='interview_book') {
+    show('card-interview'); show('card-locked-preboard'); show('card-locked-training');
+  } else if(stage==='interview_pending') {
+    show('card-interview-pending'); show('card-locked-preboard'); show('card-locked-training');
+  } else if(stage==='interview_approved'||stage==='preboard') {
+    show('card-preonboarding'); buildAcknowledgments(); show('card-locked-training');
+  } else if(stage==='preboard_done') {
+    show('card-preboard-submitted'); show('card-locked-training');
+  } else if(stage==='training_book'||stage==='training_done') {
+    show('card-training'); populateTrainingDetails();
+  } else if(stage==='hired') {
+    show('card-hired');
+  }
+}
+
+function markInterviewBooked() {
+  post({action:'updateCandidate', pin:currentCandidate.PIN||currentCandidate.pin,
+    updates:{Stage:'Interview Scheduled'}
+  }).then(function(){
+    showAlert('interview-alert',"You're all set! Ty will see your booking and be in touch to confirm.",'success');
+    var btn=document.getElementById('btn-book-interview');
+    if(btn){btn.style.opacity='0.5';btn.style.pointerEvents='none';}
+  }).catch(function(){
+    showAlert('interview-alert','Confirmed! Ty will be in touch shortly.','success');
+  });
+}
+
+function populateTrainingDetails() {
+  var c = currentCandidate;
+  var slot = c.TrainingSlot || c.trainingSlot || '';
+  var el = document.getElementById('training-details');
+  if(!el) return;
+  el.innerHTML = slot
+    ? '<div>&#128197; '+slot+'</div><div style="font-size:12px;font-weight:400;color:var(--ink-mid);margin-top:4px;">Google Meet &middot; Link in your calendar invite</div>'
+    : '<div style="font-size:13px;font-weight:400;color:var(--ink-lt);">Ty will send your session details and calendar invite shortly.</div>';
+}
+
+function submitPreOnboarding() {
+  var legal = document.getElementById('po-legal').value.trim();
+  var sig   = document.getElementById('po-sig').value.trim();
+  var ic    = document.getElementById('ack-ic').checked;
+  var count = window._ackCount || 4;
+  var allAcks = true;
+  for(var i=1;i<=count;i++){
+    var el=document.getElementById('ack'+i);
+    if(!el||!el.checked){allAcks=false;break;}
+  }
+  if(!legal)  {showAlert('preonboard-alert','Please enter your full legal name.','error');return;}
+  if(!allAcks){showAlert('preonboard-alert','Please complete all acknowledgments.','error');return;}
+  if(!ic)     {showAlert('preonboard-alert','Please agree to the IC agreement.','error');return;}
+  if(!sig)    {showAlert('preonboard-alert','Please add your electronic signature.','error');return;}
+  var btn = document.querySelector('#card-preonboarding .btn-portal');
+  if(btn){btn.disabled=true;btn.textContent='Submitting...';}
+  post({action:'updateCandidate', pin:currentCandidate.PIN||currentCandidate.pin,
+    updates:{
+      Stage:'Pre-Onboarding Submitted',
+      LegalName:legal,
+      PreferredName:document.getElementById('po-pref').value.trim(),
+      Email:document.getElementById('po-email').value.trim(),
+      Phone:document.getElementById('po-phone').value.trim(),
+      City:document.getElementById('po-city').value.trim(),
+      Transport:document.getElementById('po-transport').value,
+      Signature:sig, SignatureDate:document.getElementById('po-sig-date').value
+    }
+  }).then(function(){
+    showAlert('preonboard-alert','Form submitted! Ty will review and send your onboarding details within 48 hours.','success');
+    setTimeout(function(){renderProgress('preboard_done');renderActionCards('preboard_done');},2500);
+  }).catch(function(){
+    showAlert('preonboard-alert','Form submitted! Ty will be in touch within 48 hours.','success');
+    setTimeout(function(){renderProgress('preboard_done');renderActionCards('preboard_done');},2500);
+  });
+}
+
+function showAlert(id, msg, type) {
+  var el=document.getElementById(id);
+  if(!el) return;
+  el.textContent=msg; el.className='portal-alert show '+type;
+  if(type==='success') setTimeout(function(){el.classList.remove('show');},8000);
+}
+function logout() {
+  currentCandidate=null; pinEntry=''; updateDots();
+  document.getElementById('screen-portal').classList.remove('active');
+  document.getElementById('screen-portal').style.display='none';
+  document.getElementById('screen-login').classList.add('active');
+  document.getElementById('pin-error').textContent='';
+}
+document.addEventListener('DOMContentLoaded', function(){
+  var d=document.getElementById('po-sig-date');
+  if(d) d.value=new Date().toISOString().split('T')[0];
+});
+
+</script>
+</body>
+</html>
